@@ -12,6 +12,7 @@
         :root {
             --larossa-green: #1b4332;
             --accent-green: #2d6a4f;
+            --success-green: #4BB543;
             --bg-light: #f1f3f2;
             --border-color: #dcdde1;
         }
@@ -43,7 +44,7 @@
         }
 
         .logo-img { max-height: 45px; width: auto; }
-        .logo-text { margin-left: 12px; font-size: 22px; font-weight: 800; color: var(--larossa-green); }
+        .logo-text { margin-left: 12px; font-size: 22px; font-weight: 800; color: #166645; }
 
         form { padding: 25px; }
 
@@ -71,6 +72,7 @@
             outline: none;
             box-sizing: border-box;
             background: #fff;
+            transition: 0.3s;
         }
 
         input:focus { border-color: var(--accent-green); }
@@ -145,6 +147,12 @@
             font-weight: 700;
             cursor: pointer;
             margin-top: 20px;
+            transition: all 0.4s ease;
+        }
+
+        .submit-btn:disabled {
+            background-color: #a0a0a0;
+            cursor: not-allowed;
         }
 
         @media (min-width: 768px) {
@@ -157,7 +165,7 @@
 
 <div class="container">
     <div class="header">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7-I3UmrNaSfn3DLPjsqdgtjLD5pEndHUCbw&s" alt="Logo" class="logo-img">
+        <img src="https://i.ibb.co.com/hFhh091B/logo.jpg" alt="Logo" class="logo-img">
         <span class="logo-text">LAROSSA</span>
     </div>
 
@@ -200,12 +208,26 @@
         <div id="giftsContainer"></div>
         <button type="button" class="add-btn" onclick="addItem('giftsContainer', 'gift')">+ Сыйлық қосу</button>
 
-        <div class="section-title">Жеткізу</div>
+        <div class="section-title">Жеткізу және Төлем</div>
         <div class="field">
+            <label>Жеткізу түрі:</label>
             <select id="delivery">
                 <option value="Такси">Такси</option>
                 <option value="Курьер">Курьер</option>
                 <option value="Почта">Почта</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Төлем түрі:</label>
+            <select id="paymentMethod" required>
+                <option value="" disabled selected>Төлем түрі</option>
+                <option value="Перевод Каспи">Перевод Kaspi</option>
+                <option value="Перевод Халық">Перевод Halyk</option>
+                <option value="Рассрочка Каспи">Рассрочка Kaspi</option>
+                <option value="Рассрочка Халық">Рассрочка Halyk</option>
+                <option value="Ред Каспи">Kaspi Red</option>
+                <option value="Наличка">Наличка</option>
             </select>
         </div>
 
@@ -273,58 +295,74 @@
     }
 
     document.getElementById('orderForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const btn = document.getElementById('submitBtn');
-    btn.innerText = "Сақталуда...";
-    btn.disabled = true;
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const originalText = "ТАПСЫРЫСТЫ ЖІБЕРУ";
+        
+        btn.innerText = "Жіберілуде...";
+        btn.disabled = true;
+        btn.style.backgroundColor = "#2d6a4f";
 
-    const manager = document.getElementById('managerSelect').value === 'other' 
-        ? document.getElementById('customManagerName').value 
-        : document.getElementById('managerSelect').value;
+        const manager = document.getElementById('managerSelect').value === 'other' 
+            ? document.getElementById('customManagerName').value 
+            : document.getElementById('managerSelect').value;
 
-    let tablets = "";
-    document.querySelectorAll('.tablet-select').forEach((sel, i) => {
-        let count = document.querySelectorAll('#tabletsContainer .item-count')[i].value;
-        tablets += sel.value + " (" + count + " шт); ";
+        let tablets = "";
+        document.querySelectorAll('.tablet-select').forEach((sel, i) => {
+            let count = document.querySelectorAll('#tabletsContainer .item-count')[i].value;
+            tablets += sel.value + " (" + count + " шт); ";
+        });
+
+        let gifts = "";
+        document.querySelectorAll('.gift-select').forEach((sel, i) => {
+            let count = document.querySelectorAll('#giftsContainer .item-count')[i].value;
+            gifts += sel.value + " (" + count + " шт); ";
+        });
+
+        const formData = new URLSearchParams();
+        formData.append('manager', manager);
+        formData.append('name', document.getElementById('name').value);
+        formData.append('phone', document.getElementById('phone').value); 
+        formData.append('address', document.getElementById('address').value);
+        formData.append('tablets', tablets);
+        formData.append('gifts', gifts);
+        formData.append('delivery', document.getElementById('delivery').value);
+        formData.append('paymentMethod', document.getElementById('paymentMethod').value);
+        formData.append('totalPrice', document.getElementById('totalPrice').value);
+        formData.append('image', base64Image);
+
+        // БҰЛ ЖЕРГЕ GOOGLE SCRIPT URL-ІН ҚОЙЫҢЫЗ
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwu75WYRKNMUYn7rOSpQbA5ZboR9l3P95-z-gVzNEx7Ze2GFglGM22MqFn2YJZWF0svuw/exec';
+
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+        }).then(() => {
+            btn.innerText = "✅ Сақталды!";
+            btn.style.backgroundColor = "#4BB543";
+
+            setTimeout(() => {
+                document.getElementById('orderForm').reset();
+                document.getElementById('tabletsContainer').innerHTML = '';
+                document.getElementById('giftsContainer').innerHTML = '';
+                document.getElementById('receipt-preview').style.display = 'none';
+                document.getElementById('uploadText').innerText = "📷 Чек суретін таңдау";
+                base64Image = "";
+                
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.style.backgroundColor = "";
+            }, 5000);
+        }).catch(err => {
+            alert("Қате кетті.");
+            btn.disabled = false;
+            btn.innerText = originalText;
+            btn.style.backgroundColor = "";
+        });
     });
-
-    let gifts = "";
-    document.querySelectorAll('.gift-select').forEach((sel, i) => {
-        let count = document.querySelectorAll('#giftsContainer .item-count')[i].value;
-        gifts += sel.value + " (" + count + " шт); ";
-    });
-
-    const formData = new URLSearchParams();
-    formData.append('manager', manager);
-    formData.append('name', document.getElementById('name').value);
-    // Нөмірдің алдына ' белгісін қосамыз, Google Sheets қате бермеуі үшін
-    formData.append('phone', document.getElementById('phone').value); 
-    formData.append('address', document.getElementById('address').value);
-    formData.append('tablets', tablets);
-    formData.append('gifts', gifts);
-    formData.append('delivery', document.getElementById('delivery').value);
-    formData.append('totalPrice', document.getElementById('totalPrice').value);
-    formData.append('image', base64Image);
-
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwu75WYRKNMUYn7rOSpQbA5ZboR9l3P95-z-gVzNEx7Ze2GFglGM22MqFn2YJZWF0svuw/exec';
-
-    fetch(scriptURL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData
-    }).then(() => {
-        setTimeout(() => {
-            alert("Тапсырыс сәтті жіберілді! Нөмір қатесі түзелді.");
-            location.reload();
-        }, 2000);
-    }).catch(err => {
-        alert("Қате кетті.");
-        btn.disabled = false;
-        btn.innerText = "ТАПСЫРЫСТЫ ЖІБЕРУ";
-    });
-});
 </script>
 </body>
 </html>
