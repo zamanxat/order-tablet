@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Larossa Order Management</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --larossa-green: #1b4332;
+            --accent-green: #2d6a4f;
+            --success-green: #4BB543;
+            --bg-light: #f1f3f2;
+            --border-color: #dcdde1;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px; 
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .header {
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .logo-img { max-height: 45px; width: auto; }
+        .logo-text { margin-left: 12px; font-size: 22px; font-weight: 800; color: #166645; }
+
+        form { padding: 25px; }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 25px 0 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::after { content: ""; flex: 1; height: 1px; background: #f0f0f0; margin-left: 10px; }
+
+        label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; color: var(--larossa-green); }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+            background: #fff;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--accent-green); }
+
+        .field { margin-bottom: 18px; }
+        .hidden { display: none; }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 1fr 90px 45px;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .add-btn {
+            background-color: #f8f9fa;
+            color: var(--accent-green);
+            border: 2px dashed var(--accent-green);
+            padding: 12px;
+            width: 100%;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .remove-btn {
+            background: #fff0f0;
+            color: #ff4757;
+            border: 1px solid #ffdada;
+            border-radius: 10px;
+            height: 48px;
+            cursor: pointer;
+        }
+
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .file-upload:hover { border-color: var(--accent-green); background: #f8faf9; }
+
+        #receipt-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .remove-file-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: none;
+            z-index: 10;
+            font-weight: bold;
+        }
+
+        .total-price-section {
+            background-color: #f8faf9;
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 25px;
+            border: 1px solid var(--larossa-green);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: var(--larossa-green);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.4s ease;
+        }
+
+        .submit-btn:disabled { background-color: #a0a0a0; cursor: not-allowed; }
+
+        .time-checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8faf9;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+        .time-checkbox-wrapper input { width: auto; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <img src="https://i.ibb.co.com/hFhh091B/logo.jpg" alt="Logo" class="logo-img">
+        <span class="logo-text">LAROSSA</span>
+    </div>
+
+    <form id="orderForm">
+        <div class="section-title">Жауапты тұлға</div>
+        <div class="field">
+            <select id="manager_id" required oninvalid="this.setCustomValidity('Менеджерді таңдаңыз')" oninput="this.setCustomValidity('')">
+                <option value="" disabled selected>Менеджерді таңдаңыз...</option>
+                <option value="1">Дәулет</option>
+                <option value="2">Қарақат</option>
+                <option value="3">Нұрсұлтан</option>
+                <option value="4">Қажет</option>
+                <option value="5">Бақдәурен</option>
+                <option value="6">Мағжан</option>
+                <option value="7">Аружан</option>
+                <option value="8">Сандуғаш</option>
+                <option value="9">Адилет</option>
+            </select>
+        </div>
+
+        <div class="section-title">Тапсырыс уақыты</div>
+        <div class="time-checkbox-wrapper">
+            <input type="checkbox" id="manualTimeCheck" onchange="toggleTimeFields()">
+            <label for="manualTimeCheck" style="margin:0; cursor:pointer">Уақытты қолмен таңдау</label>
+        </div>
+
+        <div id="manualTimeFields" class="hidden">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <div>
+                    <label>Күні:</label>
+                    <input type="date" id="orderDate">
+                </div>
+                <div>
+                    <label>Уақыты:</label>
+                    <input type="time" id="orderTime">
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Клиент мәліметі</div>
+        <div class="field">
+            <input type="text" id="client_name" placeholder="Клиент аты-жөні" required oninvalid="this.setCustomValidity('Клиент атын жазыңыз')" oninput="this.setCustomValidity('')">
+        </div>
+        <div class="field">
+            <input type="tel" id="client_phone" inputmode="numeric" placeholder="+7 (___) ___-____" required oninvalid="this.setCustomValidity('Телефон нөмірін енгізіңіз')" oninput="this.setCustomValidity('')">
+        </div>
+        <div class="field">
+            <input type="text" id="address" placeholder="Адрес (Қала, көше, үй)" required oninvalid="this.setCustomValidity('Мекен-жайды толтырыңыз')" oninput="this.setCustomValidity('')">
+        </div>
+
+        <div class="section-title">Тауарлар</div>
+        <div id="tabletsContainer"></div>
+        <button type="button" class="add-btn" onclick="addItem('tabletsContainer', 'tablet')">+ Планшет қосу</button>
+
+        <div id="giftsContainer"></div>
+        <button type="button" class="add-btn" onclick="addItem('giftsContainer', 'gift')">+ Сыйлық қосу</button>
+
+        <div class="section-title">Жеткізу және Төлем</div>
+        <div class="field">
+            <label>Жеткізу түрі:</label>
+            <select id="delivery_type">
+                <option value="Такси">Такси</option>
+                <option value="Курьер">Курьер</option>
+                <option value="Почта">Почта</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Төлем түрі:</label>
+            <select id="payment_type" required oninvalid="this.setCustomValidity('Төлем түрін таңдаңыз')" oninput="this.setCustomValidity('')">
+                <option value="" disabled selected>Төлем түрі</option>
+                <option value="Kaspi Transfer">Kaspi Transfer</option>
+                <option value="Halyk Transfer">Halyk Transfer</option>
+                <option value="Kaspi рассрочка">Kaspi рассрочка</option>
+                <option value="Halyk рассрочка">Halyk рассрочка</option>
+                <option value="Kaspi Red">Kaspi Red</option>
+                <option value="Наличка">Наличка</option>
+            </select>
+        </div>
+
+        <div class="section-title">Төлем чегі</div>
+        <div class="field">
+            <div class="file-upload">
+                <button type="button" class="remove-file-btn" id="removeFileBtn" onclick="clearImage(event)">×</button>
+                <div onclick="document.getElementById('receiptFile').click()">
+                    <span id="uploadText">📷 Чек суретін таңдау</span>
+                    <input type="file" id="receiptFile" accept="image/*" class="hidden" onchange="previewImage(this)">
+                    <img id="receipt-preview" src="" alt="Чек">
+                </div>
+            </div>
+        </div>
+
+        <div class="total-price-section">
+            <label>Жалпы сатылған бағасы (₸):</label>
+            <input type="number" id="price" inputmode="numeric" placeholder="0" required oninvalid="this.setCustomValidity('Бағасын жазыңыз')" oninput="this.setCustomValidity('')">
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">ТАПСЫРЫСТЫ ЖІБЕРУ</button>
+    </form>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://jnuokhhqojlurvadcduv.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_3l9NjY0Qadv3dJ9x3-t19w_8mKniZBk';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    $(document).ready(function(){ 
+        $('#client_phone').inputmask("+7 (999) 999-9999"); 
+    });
+
+    function toggleTimeFields() {
+        const isChecked = document.getElementById('manualTimeCheck').checked;
+        document.getElementById('manualTimeFields').classList.toggle('hidden', !isChecked);
+    }
+
+    function addItem(containerId, type) {
+        const container = document.getElementById(containerId);
+        const div = document.createElement('div');
+        div.className = 'item-row';
+        const options = type === 'tablet' 
+            ? '<option value="G2000">G2000</option><option value="17 Pro Max">17 Pro Max</option>' 
+            : '<option value="Смарт набор">Смарт набор</option><option value="Массажер">Массажер</option><option value="Смарт сағат">Смарт сағат</option><option value="Переходник">Переходник</option>';
+        div.innerHTML = `<select class="${type}-select">${options}</select><input type="number" inputmode="numeric" class="item-count" value="1"><button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>`;
+        container.appendChild(div);
+    }
+
+    function previewImage(input) {
+        const preview = document.getElementById('receipt-preview');
+        const removeBtn = document.getElementById('removeFileBtn');
+        const uploadText = document.getElementById('uploadText');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => { 
+                preview.src = e.target.result; 
+                preview.style.display = 'block';
+                removeBtn.style.display = 'block';
+                uploadText.style.display = 'none';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function clearImage(event) {
+        event.stopPropagation();
+        const input = document.getElementById('receiptFile');
+        const preview = document.getElementById('receipt-preview');
+        const removeBtn = document.getElementById('removeFileBtn');
+        const uploadText = document.getElementById('uploadText');
+        input.value = "";
+        preview.src = "";
+        preview.style.display = 'none';
+        removeBtn.style.display = 'none';
+        uploadText.style.display = 'block';
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "Жіберілуде...";
+        btn.disabled = true;
+
+        let products = ""; 
+        document.querySelectorAll('.tablet-select').forEach((s, i) => { 
+            products += s.value + " (" + document.querySelectorAll('#tabletsContainer .item-count')[i].value + " шт); "; 
+        });
+        
+        let gifts = ""; 
+        document.querySelectorAll('.gift-select').forEach((s, i) => { 
+            gifts += s.value + " (" + document.querySelectorAll('#giftsContainer .item-count')[i].value + " шт); "; 
+        });
+
+        // --- УАҚЫТТЫ РЕТТЕУ (UTC+5 ALMATY) ---
+        let finalTime;
+        const isManual = document.getElementById('manualTimeCheck').checked;
+        if (isManual) {
+            const d = document.getElementById('orderDate').value;
+            const t = document.getElementById('orderTime').value;
+            const localDate = new Date(`${d}T${t}`);
+            const offset = localDate.getTimezoneOffset() * 60000;
+            finalTime = new Date(localDate.getTime() - offset).toISOString();
+        } else {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            finalTime = new Date(now.getTime() - offset).toISOString();
+        }
+
+        try {
+            let receiptUrl = "";
+            const file = document.getElementById('receiptFile').files[0];
+            if (file) {
+                const fileName = `${Date.now()}_receipt.jpg`;
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('receipts')
+                    .upload(fileName, file);
+                
+                if (uploadError) throw new Error("Сурет жүктелмеді: " + uploadError.message);
+                const { data: urlData } = supabaseClient.storage.from('receipts').getPublicUrl(fileName);
+                receiptUrl = urlData.publicUrl;
+            }
+
+            const { error: dbError } = await supabaseClient
+                .from('orders')
+                .insert([{
+                    created_at: finalTime,
+                    manager_id: parseInt(document.getElementById('manager_id').value) || null,
+                    client_name: document.getElementById('client_name').value,
+                    client_phone: document.getElementById('client_phone').value,
+                    address: document.getElementById('address').value,
+                    product: products || "Таңдалмады", 
+                    gift: gifts || "Жоқ",       
+                    delivery_type: document.getElementById('delivery_type').value,
+                    payment_type: document.getElementById('payment_type').value,
+                    price: Number(document.getElementById('price').value),
+                    receipt_url: receiptUrl
+                }]);
+
+            if (dbError) throw dbError;
+
+            btn.innerText = "✅ ЖІБЕРІЛДІ!";
+            btn.style.backgroundColor = "var(--success-green)";
+            setTimeout(() => location.reload(), 2000);
+
+        } catch (err) {
+            console.error("Толық қате:", err);
+            alert("Қате орын алды: " + (err.message || "Белгісіз қате"));
+            btn.disabled = false;
+            btn.innerText = "Қайта көру";
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Larossa Order Management</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
+
+    <style>
+        :root {
+            --larossa-green: #1b4332;
+            --accent-green: #2d6a4f;
+            --success-green: #4BB543;
+            --bg-light: #f1f3f2;
+            --border-color: #dcdde1;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px; 
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .header {
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .logo-img { max-height: 45px; width: auto; }
+        .logo-text { margin-left: 12px; font-size: 22px; font-weight: 800; color: #166645; }
+
+        form { padding: 25px; }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 25px 0 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::after { content: ""; flex: 1; height: 1px; background: #f0f0f0; margin-left: 10px; }
+
+        label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; color: var(--larossa-green); }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+            background: #fff;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--accent-green); }
+
+        .field { margin-bottom: 18px; }
+        .hidden { display: none; }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 1fr 90px 45px;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .add-btn {
+            background-color: #f8f9fa;
+            color: var(--accent-green);
+            border: 2px dashed var(--accent-green);
+            padding: 12px;
+            width: 100%;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .remove-btn {
+            background: #fff0f0;
+            color: #ff4757;
+            border: 1px solid #ffdada;
+            border-radius: 10px;
+            height: 48px;
+            cursor: pointer;
+        }
+
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .file-upload:hover { border-color: var(--accent-green); background: #f8faf9; }
+
+        #receipt-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .total-price-section {
+            background-color: #f8faf9;
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 25px;
+            border: 1px solid var(--larossa-green);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: var(--larossa-green);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.4s ease;
+        }
+
+        .submit-btn:disabled {
+            background-color: #a0a0a0;
+            cursor: not-allowed;
+        }
+
+        @media (min-width: 768px) {
+            form { padding: 40px; }
+            input, select, .submit-btn { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <img src="https://i.ibb.co.com/hFhh091B/logo.jpg" alt="Logo" class="logo-img">
+        <span class="logo-text">LAROSSA</span>
+    </div>
+
+    <form id="orderForm">
+        <div class="section-title">Жауапты тұлға</div>
+        <div class="field">
+            <select id="managerSelect" required onchange="toggleOtherManager()">
+                <option value="" disabled selected>Менеджерді таңдаңыз...</option>
+                <option value="Дәулет">Дәулет</option>
+                <option value="Қарақат">Қарақат</option>
+                <option value="Нұрсұлтан">Нұрсұлтан</option>
+                <option value="Қажет">Қажет</option>
+                <option value="Бақдәурен">Бақдәурен</option>
+                <option value="Мағжан">Мағжан</option>
+                <option value="Аружан">Аружан</option>
+                <option value="Сандуғаш">Сандуғаш</option>
+                <option value="Ади">Ади</option>
+                <option value="other">Басқа...</option>
+            </select>
+        </div>
+        <div id="otherManagerField" class="field hidden">
+            <input type="text" id="customManagerName" placeholder="Атыңызды жазыңыз">
+        </div>
+
+        <div class="section-title">Клиент мәліметі</div>
+        <div class="field">
+            <input type="text" id="name" placeholder="Клиент аты-жөні" required>
+        </div>
+        <div class="field">
+            <input type="tel" id="phone" inputmode="numeric" placeholder="+7 (___) ___-____" required>
+        </div>
+        <div class="field">
+            <input type="text" id="address" placeholder="Адрес (Қала, көше, үй)" required>
+        </div>
+
+        <div class="section-title">Тауарлар</div>
+        <div id="tabletsContainer"></div>
+        <button type="button" class="add-btn" onclick="addItem('tabletsContainer', 'tablet')">+ Планшет қосу</button>
+
+        <div id="giftsContainer"></div>
+        <button type="button" class="add-btn" onclick="addItem('giftsContainer', 'gift')">+ Сыйлық қосу</button>
+
+        <div class="section-title">Жеткізу және Төлем</div>
+        <div class="field">
+            <label>Жеткізу түрі:</label>
+            <select id="delivery">
+                <option value="Такси">Такси</option>
+                <option value="Курьер">Курьер</option>
+                <option value="Почта">Почта</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Төлем түрі:</label>
+            <select id="paymentMethod" required>
+                <option value="" disabled selected>Төлем түрі</option>
+                <option value="Перевод Каспи">Перевод Kaspi</option>
+                <option value="Перевод Халық">Перевод Halyk</option>
+                <option value="Рассрочка Каспи">Рассрочка Kaspi</option>
+                <option value="Рассрочка Халық">Рассрочка Halyk</option>
+                <option value="Ред Каспи">Kaspi Red</option>
+                <option value="Наличка">Наличка</option>
+            </select>
+        </div>
+
+        <div class="section-title">Төлем чегі</div>
+        <div class="field">
+            <div class="file-upload" onclick="document.getElementById('receiptFile').click()">
+                <span id="uploadText">📷 Чек суретін таңдау</span>
+                <input type="file" id="receiptFile" accept="image/*" class="hidden" onchange="previewImage(this)">
+                <img id="receipt-preview" src="" alt="Чек">
+            </div>
+        </div>
+
+        <div class="total-price-section">
+            <label>Жалпы сатылған бағасы (₸):</label>
+            <input type="number" id="totalPrice" placeholder="0" required>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">ТАПСЫРЫСТЫ ЖІБЕРУ</button>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#phone').inputmask({
+            mask: "+7 (999) 999-9999",
+            placeholder: "_",
+            showMaskOnHover: false,
+            showMaskOnFocus: true,
+            jitMasking: true
+        });
+    });
+
+    function toggleOtherManager() {
+        const select = document.getElementById('managerSelect');
+        const otherField = document.getElementById('otherManagerField');
+        select.value === 'other' ? otherField.classList.remove('hidden') : otherField.classList.add('hidden');
+    }
+
+    function addItem(containerId, type) {
+        const container = document.getElementById(containerId);
+        const div = document.createElement('div');
+        div.className = 'item-row';
+        const options = type === 'tablet' 
+            ? '<option value="G2000">G2000</option><option value="17 Pro Max">17 Pro Max</option>'
+            : '<option value="Смарт набор">Смарт набор</option><option value="Смарт сағат">Смарт сағат</option><option value="Переходник">Переходник</option><option value="Массажер">Массажер</option>';
+        div.innerHTML = `<select class="${type}-select">${options}</select><input type="number" class="item-count" value="1" min="1"><button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>`;
+        container.appendChild(div);
+    }
+
+    let base64Image = ""; 
+
+    function previewImage(input) {
+        const preview = document.getElementById('receipt-preview');
+        const text = document.getElementById('uploadText');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                text.innerText = "✅ Сурет жүктелді";
+                base64Image = e.target.result; 
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const originalText = "ТАПСЫРЫСТЫ ЖІБЕРУ";
+        
+        btn.innerText = "Жіберілуде...";
+        btn.disabled = true;
+        btn.style.backgroundColor = "#2d6a4f";
+
+        const manager = document.getElementById('managerSelect').value === 'other' 
+            ? document.getElementById('customManagerName').value 
+            : document.getElementById('managerSelect').value;
+
+        let tablets = "";
+        document.querySelectorAll('.tablet-select').forEach((sel, i) => {
+            let count = document.querySelectorAll('#tabletsContainer .item-count')[i].value;
+            tablets += sel.value + " (" + count + " шт); ";
+        });
+
+        let gifts = "";
+        document.querySelectorAll('.gift-select').forEach((sel, i) => {
+            let count = document.querySelectorAll('#giftsContainer .item-count')[i].value;
+            gifts += sel.value + " (" + count + " шт); ";
+        });
+
+        const formData = new URLSearchParams();
+        formData.append('manager', manager);
+        formData.append('name', document.getElementById('name').value);
+        formData.append('phone', document.getElementById('phone').value); 
+        formData.append('address', document.getElementById('address').value);
+        formData.append('tablets', tablets);
+        formData.append('gifts', gifts);
+        formData.append('delivery', document.getElementById('delivery').value);
+        formData.append('paymentMethod', document.getElementById('paymentMethod').value);
+        formData.append('totalPrice', document.getElementById('totalPrice').value);
+        formData.append('image', base64Image);
+
+        // БҰЛ ЖЕРГЕ GOOGLE SCRIPT URL-ІН ҚОЙЫҢЫЗ
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwu75WYRKNMUYn7rOSpQbA5ZboR9l3P95-z-gVzNEx7Ze2GFglGM22MqFn2YJZWF0svuw/exec';
+
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+        }).then(() => {
+            btn.innerText = "✅ Сақталды!";
+            btn.style.backgroundColor = "#4BB543";
+
+            setTimeout(() => {
+                document.getElementById('orderForm').reset();
+                document.getElementById('tabletsContainer').innerHTML = '';
+                document.getElementById('giftsContainer').innerHTML = '';
+                document.getElementById('receipt-preview').style.display = 'none';
+                document.getElementById('uploadText').innerText = "📷 Чек суретін таңдау";
+                base64Image = "";
+                
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.style.backgroundColor = "";
+            }, 5000);
+        }).catch(err => {
+            alert("Қате кетті.");
+            btn.disabled = false;
+            btn.innerText = originalText;
+            btn.style.backgroundColor = "";
+        });
+    });
+</script>
+</body>
+</html>
