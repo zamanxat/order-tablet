@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Larossa Logistics | Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --card-radius: 24px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 15px;
+            padding-bottom: 100px;
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes skeleton {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+
+        .animate-card { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* Header & Search */
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(248, 250, 252, 0.85);
+            backdrop-filter: blur(12px);
+            margin: -15px -15px 15px -15px; padding: 15px;
+        }
+
+        .search-box {
+            position: relative;
+            background: var(--white);
+            border-radius: 18px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+
+        .search-box:focus-within { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+
+        .search-box input {
+            width: 100%; padding: 16px 16px 16px 52px;
+            border: none; border-radius: 18px;
+            font-size: 16px; outline: none; background: transparent;
+        }
+
+        .search-box i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--accent); }
+
+        /* Фильтрлер */
+        .filters { display: flex; gap: 10px; overflow-x: auto; padding: 12px 0; scrollbar-width: none; }
+        .filters::-webkit-scrollbar { display: none; }
+        
+        .chip {
+            white-space: nowrap; padding: 10px 22px; border-radius: 30px;
+            background: var(--white); border: 1px solid #e2e8f0;
+            font-size: 13px; font-weight: 700; color: #64748b;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .chip.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+
+        /* Карточка */
+        .card {
+            background: var(--white); border-radius: var(--card-radius);
+            padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+            border: 1px solid #f1f5f9;
+            transition: 0.3s;
+        }
+
+        .card-title { font-size: 19px; font-weight: 800; color: var(--primary); margin-bottom: 12px; }
+
+        .contact-bar {
+            background: #f0f7ff; padding: 14px; border-radius: 18px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; text-decoration: none;
+        }
+
+        .phone-num { font-size: 18px; font-weight: 800; color: var(--accent); }
+
+        .call-icon {
+            width: 40px; height: 40px; background: var(--success);
+            color: white; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .info-item { display: flex; gap: 12px; margin-bottom: 18px; }
+        .info-item i { color: var(--danger); font-size: 18px; margin-top: 3px; }
+        .info-text { font-size: 15px; font-weight: 600; color: #475569; line-height: 1.4; }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+        
+        .btn-action {
+            padding: 14px; border-radius: 16px; border: none;
+            font-weight: 750; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s;
+        }
+        
+        .btn-2gis { background: var(--primary); color: white; }
+        .btn-copy { background: #f1f5f9; color: #475569; }
+
+        .cargo-tag {
+            background: #f8fafc; border-radius: 18px; padding: 15px;
+            border-left: 6px solid var(--accent); margin-bottom: 18px;
+        }
+        .cargo-name { font-weight: 800; color: var(--primary); font-size: 15px; }
+
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        select {
+            width: 100%; padding: 14px; border-radius: 16px;
+            border: 1.5px solid #e2e8f0; font-weight: 700;
+            font-size: 13px; background: white; outline: none;
+        }
+
+        /* FAB Button */
+        .fab {
+            position: fixed; bottom: 30px; right: 25px;
+            width: 65px; height: 65px; background: var(--primary);
+            color: white; border-radius: 22px; border: none;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="mainSearch" placeholder="Аты, номер немесе мекен-жай..." oninput="filter()">
+        </div>
+        <div class="filters">
+            <button class="chip active" onclick="applyFilter('Барлығы', this)">Барлығы</button>
+            <button class="chip" onclick="applyFilter('Бүгін', this)">📅 Бүгін</button>
+            <button class="chip" onclick="applyFilter('Жаңа', this)">⏳ Жаңа</button>
+            <button class="chip" onclick="applyFilter('Жолда', this)">🚚 Жолда</button>
+            <button class="chip" onclick="applyFilter('Қабылданды', this)">✅ Жетті</button>
+        </div>
+    </div>
+
+    <div id="container"></div>
+
+    <button class="fab" onclick="load()">
+        <i class="fas fa-sync-alt fa-lg"></i>
+    </button>
+
+    <script>
+        const SB_URL = 'https://jnuokhhqojlurvadcduv.supabase.co';
+        const SB_KEY = 'sb_publishable_3l9NjY0Qadv3dJ9x3-t19w_8mKniZBk'; 
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        let store = [];
+        let currentFilter = 'Барлығы';
+
+        async function load() {
+            const { data, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+            if (!error) {
+                store = data;
+                filter();
+            }
+        }
+
+        function applyFilter(status, el) {
+            currentFilter = status;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            filter();
+        }
+
+        function filter() {
+            const val = document.getElementById('mainSearch').value.toLowerCase();
+            const today = new Date().toLocaleDateString();
+
+            const filtered = store.filter(o => {
+                const searchMatch = (o.client_name?.toLowerCase().includes(val) || o.client_phone?.includes(val) || o.address?.toLowerCase().includes(val));
+                
+                let statusMatch = false;
+                if (currentFilter === 'Барлығы') {
+                    statusMatch = true;
+                } else if (currentFilter === 'Бүгін') {
+                    const orderDate = new Date(o.created_at).toLocaleDateString();
+                    statusMatch = (orderDate === today);
+                } else {
+                    statusMatch = (o.status === currentFilter);
+                }
+
+                return searchMatch && statusMatch;
+            });
+            render(filtered);
+        }
+
+        function render(list) {
+            const container = document.getElementById('container');
+            if (list.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:100px; color:#94a3b8;">Тапсырыс табылмады 🔍</div>';
+                return;
+            }
+
+            container.innerHTML = list.map((o, i) => `
+                <div class="card animate-card" style="animation-delay: ${i * 0.03}s">
+                    <div class="card-title">${o.client_name || 'Клиент аты жоқ'}</div>
+                    <a href="tel:${o.client_phone}" class="contact-bar">
+                        <span class="phone-num">${o.client_phone || 'Номерсіз'}</span>
+                        <div class="call-icon"><i class="fas fa-phone"></i></div>
+                    </a>
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div class="info-text" id="addr_${o.id}">${o.address || '—'}</div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-action btn-copy" onclick="copy('addr_${o.id}', this)">
+                            <i class="far fa-copy"></i> Көшіру
+                        </button>
+                        <a href="https://2gis.kz/search/${encodeURIComponent(o.address)}" target="_blank" class="btn-action btn-2gis" style="text-decoration:none">
+                            <i class="fas fa-compass"></i> 2GIS
+                        </a>
+                    </div>
+                    <div class="cargo-tag">
+                        <div class="cargo-name">📦 ${o.product || '—'}</div>
+                        ${o.gift ? `<div style="color:var(--danger); font-weight:800; font-size:12px; margin-top:8px;">🎁 Сыйлық: ${o.gift}</div>` : ''}
+                    </div>
+                    <div class="status-grid">
+                        <select onchange="update('${o.id}', 'delivery_type', this.value)">
+                            <option value="Курьер" ${o.delivery_type === 'Курьер' ? 'selected' : ''}>🛵 Курьер</option>
+                            <option value="Такси" ${o.delivery_type === 'Такси' ? 'selected' : ''}>🚕 Такси</option>
+                            <option value="Поезд" ${o.delivery_type === 'Поезд' ? 'selected' : ''}>🚂 Поезд</option>
+                            <option value="Почта" ${o.delivery_type === 'Почта' ? 'selected' : ''}>📦 Почта</option>
+                        </select>
+                        <select onchange="update('${o.id}', 'status', this.value)" 
+                                style="background: ${o.status === 'Қабылданды' ? '#dcfce7' : (o.status === 'Жолда' ? '#dbeafe' : 'white')};
+                                       color: ${o.status === 'Қабылданды' ? '#166534' : (o.status === 'Жолда' ? '#1e40af' : '#0f172a')}">
+                            <option value="Жаңа" ${o.status === 'Жаңа' ? 'selected' : ''}>⏳ Жаңа</option>
+                            <option value="Процесте" ${o.status === 'Процесте' ? 'selected' : ''}>🔄 Процесте</option>
+                            <option value="Жолда" ${o.status === 'Жолда' ? 'selected' : ''}>🚚 Жолда</option>
+                            <option value="Қабылданды" ${o.status === 'Қабылданды' ? 'selected' : ''}>✅ Жетті</option>
+                        </select>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function update(id, field, val) {
+            const { error } = await supabaseClient.from('orders').update({ [field]: val }).eq('id', id);
+            if (!error) {
+                const item = store.find(o => o.id == id);
+                if (item) item[field] = val;
+                filter();
+            }
+        }
+
+        function copy(elementId, btn) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text);
+            const original = btn.innerHTML;
+            btn.innerHTML = '✅ Көшірілді';
+            setTimeout(() => { btn.innerHTML = original; }, 2000);
+        }
+
+        load();
+    </script>
+</body>
+</html>
