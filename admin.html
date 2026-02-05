@@ -13,6 +13,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="shortcut icon" href="https://i.ibb.co.com/hFhh091B/logo.jpg" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #0f172a;
@@ -233,114 +236,120 @@
 
 
         /* admin-logistic */
+        /* LAROSSA Logistics Admin Styles */
 
-
-        /* Префикс: adm- (Admin) */
         :root {
-            --adm-bg: #f8fafc;
-            --adm-white: #ffffff;
-            --adm-primary: #1e293b;
-            --adm-accent: #2563eb;
-            --adm-border: #e2e8f0;
-            --adm-success: #16a34a;
-            --adm-danger: #dc2626;
-            --adm-warning: #d97706;
+            --lrs-bg: #f8fafc;
+            --lrs-white: #ffffff;
+            --lrs-main: #0f172a;
+            --lrs-accent: #3b82f6;
+            --lrs-border: #e2e8f0;
+            --lrs-text-light: #64748b;
+            --lrs-shadow: 0 12px 30px -10px rgba(0,0,0,0.08);
+            --lrs-radius: 16px;
         }
 
-        .adm-body-wrapper {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--adm-bg);
-            margin: 0; padding: 20px;
-        }
-
-        /* Toolbar */
-        .adm-toolbar {
-            display: flex; gap: 10px; margin-bottom: 20px;
-        }
-
-        .adm-search-container {
-            position: relative; flex: 1;
-        }
-
-        .adm-search-container input {
-            width: 100%; padding: 12px 15px 12px 40px;
-            border-radius: 10px; border: 1px solid var(--adm-border);
-            font-size: 15px; outline: none; box-sizing: border-box;
-        }
-
-        .adm-search-container input:focus { border-color: var(--adm-accent); }
-        .adm-search-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-
-        .adm-btn-refresh {
-            padding: 0 20px; background: var(--adm-white);
-            border: 1px solid var(--adm-border); border-radius: 10px;
-            cursor: pointer; color: var(--adm-primary);
-            transition: 0.2s;
-        }
-        .adm-btn-refresh:active { transform: scale(0.95); }
-
-        /* Table Area */
-        .adm-table-wrapper {
-            background: var(--adm-white); border-radius: 12px;
-            border: 1px solid var(--adm-border);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            overflow-x: auto;
-        }
-
-        .adm-main-table {
-            width: 100%; border-collapse: collapse; min-width: 1000px;
-        }
-
-        .adm-main-table th {
-            background: #f1f5f9; padding: 15px; text-align: left;
-            font-size: 11px; text-transform: uppercase;
-            color: #64748b; border-bottom: 1px solid var(--adm-border);
-        }
-
-        .adm-main-table td {
-            padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px;
-        }
-
-        /* Status & Selects */
-        .adm-select-ui {
-            padding: 6px 10px; border-radius: 6px;
-            border: 1px solid var(--adm-border);
-            font-weight: 600; font-size: 13px; outline: none;
-            cursor: pointer; width: 140px;
-        }
-
-        .adm-st-new { color: #57534e; background: #f5f5f4; }
-        .adm-st-process { color: var(--adm-warning); background: #fffbeb; border-color: #fde68a; }
-        .adm-st-shipping { color: var(--adm-accent); background: #eff6ff; border-color: #bfdbfe; }
-        .adm-st-done { color: var(--adm-success); background: #f0fdf4; border-color: #bbf7d0; }
-        .adm-st-return { color: var(--adm-danger); background: #fef2f2; border-color: #fecaca; }
-
-        .adm-btn-view-receipt {
-            background: #f8fafc; border: 1px solid var(--adm-border);
-            padding: 6px 12px; border-radius: 6px;
-            cursor: pointer; font-weight: 600; font-size: 12px;
-        }
-
-        /* Modal Area */
-        #adm-receipt-modal {
-            display: none; position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            background: rgba(15,23,42,0.9); z-index: 99999;
-            justify-content: center; align-items: center;
-        }
-
-        .adm-modal-inner {
-            position: relative; background: white;
-            padding: 8px; border-radius: 12px;
-            max-width: 90%; max-height: 90vh;
-        }
-
-        .adm-modal-inner img { max-width: 100%; max-height: 80vh; border-radius: 6px; display: block; }
         
-        .adm-modal-close {
-            position: absolute; top: -40px; right: 0;
-            color: white; font-size: 35px; cursor: pointer;
+
+        /* TOOLBAR */
+        .lrs-header {
+            background: var(--lrs-white);
+            padding: 24px;
+            border-radius: var(--lrs-radius);
+            box-shadow: var(--lrs-shadow);
+            margin-bottom: 20px;
+            border: 1px solid var(--lrs-border);
         }
+
+        .lrs-toolbar {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 1.2fr auto;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        @media (max-width: 1024px) {
+            .lrs-toolbar { grid-template-columns: 1fr 1fr; }
+        }
+
+        .lrs-input-group { display: flex; flex-direction: column; gap: 6px; }
+        .lrs-label { font-size: 10px; font-weight: 800; color: var(--lrs-text-light); text-transform: uppercase; letter-spacing: 1px; }
+
+        .lrs-control {
+            height: 44px;
+            padding: 0 14px;
+            border-radius: 10px;
+            border: 1px solid var(--lrs-border);
+            background: #f1f5f9;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+            outline: none;
+        }
+
+        .lrs-control:focus { border-color: var(--lrs-accent); background: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+
+        .lrs-search-container { position: relative; }
+        .lrs-search-container i { position: absolute; left: 14px; top: 14px; color: #94a3b8; }
+        .lrs-search-input { width: 100%; padding-left: 40px !important; box-sizing: border-box; }
+
+        .lrs-refresh-btn {
+            width: 44px; height: 44px;
+            background: var(--lrs-main);
+            color: white; border: none;
+            border-radius: 10px; cursor: pointer;
+            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* TABLE DESIGN */
+        .lrs-table-card {
+            background: var(--lrs-white);
+            border-radius: var(--lrs-radius);
+            box-shadow: var(--lrs-shadow);
+            overflow-x: auto;
+            border: 1px solid var(--lrs-border);
+        }
+
+        .lrs-table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+        .lrs-table th { background: #f8fafc; padding: 16px; text-align: left; font-size: 11px; color: var(--lrs-text-light); text-transform: uppercase; border-bottom: 1px solid var(--lrs-border); }
+        .lrs-table td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 13.5px; vertical-align: middle; }
+
+        /* PRODUCT & GIFTS BOX */
+        .lrs-product-info { display: flex; flex-direction: column; gap: 4px; }
+        .lrs-gift-tag { 
+            display: inline-flex; align-items: center; gap: 4px;
+            background: #f0fdf4; color: #166534; 
+            padding: 2px 8px; border-radius: 6px; 
+            font-size: 11px; font-weight: 700; border: 1px solid #bbf7d0;
+            width: fit-content;
+        }
+
+        /* STATUS BADGES */
+        .st-badge { padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; border: 1px solid transparent; }
+        .st-new { background: #f1f5f9; color: #475569; }
+        .st-process { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+        .st-shipping { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
+        .st-done { background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
+        .st-return { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
+
+        /* RECEIPT BUTTON */
+        .lrs-btn-receipt {
+            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            color: white; border: none; padding: 8px 14px; border-radius: 8px;
+            font-size: 12px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        /* MODAL */
+        .lrs-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);
+            z-index: 9999; justify-content: center; align-items: center;
+        }
+        .lrs-modal.show { display: flex; }
+        .lrs-modal-content { background: white; padding: 10px; border-radius: 20px; max-width: 450px; width: 90%; }
+        .lrs-modal-content img { width: 100%; border-radius: 14px; display: block; }
 
     </style>
 </head>
@@ -513,40 +522,69 @@
                 </table>
             </div>
 
-            <div class="adm-body-wrapper">
-        <div class="adm-toolbar">
-            <div class="adm-search-container">
-                <i class="fas fa-search"></i>
-                <input type="text" id="adm-search-input" placeholder="Клиент, тел, мекен-жай немесе тауар..." oninput="admFilterTable()">
+            <!-- /* ADMIN LOGISTIC */ -->
+                <div class="lrs-header">
+        <div class="lrs-toolbar">
+            <div class="lrs-input-group">
+                <label class="lrs-label">Ақылды іздеу</label>
+                <div class="lrs-search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="lrs-search" class="lrs-control lrs-search-input" placeholder="Клиент, телефон немесе тауар..." oninput="lrsFilter()">
+                </div>
             </div>
-            <button class="adm-btn-refresh" onclick="admFetchOrders()">
+
+            <div class="lrs-input-group">
+                <label class="lrs-label">Уақыт</label>
+                <select id="lrs-time" class="lrs-control" onchange="lrsHandleTime(this.value)">
+                    <option value="all">📅 Барлық уақыт</option>
+                    <option value="today">Бүгін</option>
+                    <option value="week">Осы апта</option>
+                </select>
+            </div>
+
+            <div class="lrs-input-group">
+                <label class="lrs-label">Логистика статусы</label>
+                <select id="lrs-status-f" class="lrs-control" onchange="lrsFilter()">
+                    <option value="all">🌐 Барлығы</option>
+                    <option value="Жаңа">⏳ Жаңа</option>
+                    <option value="Процесте">🔄 Процесте</option>
+                    <option value="Жолда">🚚 Жолда</option>
+                    <option value="Қабылданды">✅ Жетті</option>
+                    <option value="Қайтарылды">❌ Қайтарылды</option>
+                </select>
+            </div>
+
+            <button class="lrs-refresh-btn" onclick="lrsLoad()">
                 <i class="fas fa-sync-alt"></i>
             </button>
         </div>
-        <div class="adm-table-wrapper">
-            <table class="adm-main-table">
-                <thead>
-                    <tr>
-                        <th>Күні</th>
-                        <th>Клиент</th>
-                        <th>Мекен-жай</th>
-                        <th>Тауар</th>
-                        <th>Бағасы</th>
-                        <th>Жеткізу</th>
-                        <th>Статус</th>
-                        <th>Чек</th>
-                    </tr>
-                </thead>
-                <tbody id="adm-table-body"></tbody>
-            </table>
-        </div>
-        <div id="adm-receipt-modal" onclick="admCloseModal()">
-            <div class="adm-modal-inner" onclick="event.stopPropagation()">
-                <span class="adm-modal-close" onclick="admCloseModal()">&times;</span>
-                <img id="adm-receipt-img-tag" src="">
-            </div>
+    </div>
+
+    <div class="lrs-table-card">
+        <table class="lrs-table">
+            <thead>
+                <tr>
+                    <th>ID / Күні</th>
+                    <th>Клиент</th>
+                    <th>Мекен-жай</th>
+                    <th>Тауар және Сыйлықтар</th>
+                    <th>Бағасы</th>
+                    <th>Жеткізу</th>
+                    <th>Статус</th>
+                    <th>Чек</th>
+                </tr>
+            </thead>
+            <tbody id="lrs-tbody"></tbody>
+        </table>
+    </div>
+
+    <div id="lrs-modal" class="lrs-modal" onclick="lrsCloseModal()">
+        <div class="lrs-modal-content" onclick="event.stopPropagation()">
+            <img id="lrs-modal-img" src="" alt="Receipt">
         </div>
     </div>
+            <!-- ADMIN LOGISTIC END -->
+
             
         </div>
 
@@ -1277,110 +1315,115 @@
 </script>
 
 
+
+<!-- */------------------ LAROSSA ADMIN LOGISTIC СКРИПТІ ------------------ */ -->
 <script>
-        const ADM_SB_URL = 'https://jnuokhhqojlurvadcduv.supabase.co';
-        const ADM_SB_KEY = 'sb_publishable_3l9NjY0Qadv3dJ9x3-t19w_8mKniZBk'; 
-        const admSupabase = supabase.createClient(ADM_SB_URL, ADM_SB_KEY);
+        const SB_URL = 'https://jnuokhhqojlurvadcduv.supabase.co';
+        const SB_KEY = 'sb_publishable_3l9NjY0Qadv3dJ9x3-t19w_8mKniZBk'; 
+        const lrsSB = supabase.createClient(SB_URL, SB_KEY);
 
-        let admOrdersData = [];
+        let masterData = [];
 
-        async function admFetchOrders() {
-            const { data, error } = await admSupabase
-                .from('orders')
-                .select('*')
-                .order('created_at', { ascending: false });
-
+        async function lrsLoad() {
+            const tbody = document.getElementById('lrs-tbody');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Жүктелуде...</td></tr>';
+            
+            const { data, error } = await lrsSB.from('orders').select('*').order('created_at', { ascending: false });
+            
             if (!error) {
-                admOrdersData = data;
-                admRenderTable(data);
+                masterData = data;
+                lrsFilter();
             }
         }
 
-        function admGetStatusClass(status) {
-            switch(status) {
-                case 'Жаңа': return 'adm-st-new';
-                case 'Процесте': return 'adm-st-process';
-                case 'Жолда': return 'adm-st-shipping';
-                case 'Қабылданды': return 'adm-st-done';
-                case 'Қайтарылды': return 'adm-st-return';
-                default: return '';
+        function lrsFilter() {
+            const q = document.getElementById('lrs-search').value.toLowerCase();
+            const st = document.getElementById('lrs-status-f').value;
+            const time = document.getElementById('lrs-time').value;
+            
+            let filtered = [...masterData];
+
+            if (st !== 'all') filtered = filtered.filter(o => (o.status || "Жаңа") === st);
+            
+            if (q) {
+                filtered = filtered.filter(o => 
+                    o.client_name?.toLowerCase().includes(q) || 
+                    o.client_phone?.includes(q) || 
+                    o.product?.toLowerCase().includes(q) ||
+                    (o.gifts || o.gift || o.comment)?.toLowerCase().includes(q)
+                );
             }
+
+            if (time === 'today') {
+                const today = new Date().setHours(0,0,0,0);
+                filtered = filtered.filter(o => new Date(o.created_at) >= today);
+            }
+
+            lrsRender(filtered);
         }
 
-        function admRenderTable(orders) {
-            const tbody = document.getElementById('adm-table-body');
-            tbody.innerHTML = orders.map(order => `
+        function lrsRender(items) {
+            const tbody = document.getElementById('lrs-tbody');
+            tbody.innerHTML = items.map(o => {
+                // Сыйлықтарды бірнеше бағаннан тексеру (gifts, gift немесе comment)
+                const giftData = o.gifts || o.gift || o.comment || "";
+                
+                return `
                 <tr>
-                    <td style="font-size:12px; color:#64748b">
-                        ${new Date(order.created_at).toLocaleDateString()}<br>
-                        ${new Date(order.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
-                    </td>
+                    <td><b style="color:var(--lrs-accent)">#${o.id.toString().slice(-4)}</b><br><small>${new Date(o.created_at).toLocaleDateString()}</small></td>
+                    <td><strong>${o.client_name || '—'}</strong><br><span style="color:var(--lrs-accent)">${o.client_phone || '—'}</span></td>
+                    <td><div style="max-width:220px; font-size:12px;">${o.address || '—'}</div></td>
                     <td>
-                        <strong>${order.client_name || '—'}</strong><br>
-                        <small style="color:#64748b">${order.client_phone || '—'}</small>
+                        <div class="lrs-product-info">
+                            <strong>${o.product || 'Тауарсыз'}</strong>
+                            ${giftData ? `<div class="lrs-gift-tag"><i class="fas fa-gift"></i> ${giftData}</div>` : ''}
+                        </div>
                     </td>
-                    <td><div style="max-width:200px; font-size:13px">${order.address || '—'}</div></td>
+                    <td><b>${(o.price || 0).toLocaleString()} ₸</b></td>
                     <td>
-                        ${order.product || '—'}
-                        ${order.gift ? `<br><small style="color:#db2777">🎁 ${order.gift}</small>` : ''}
-                    </td>
-                    <td><strong style="color:var(--adm-primary)">${(order.price || 0).toLocaleString()} ₸</strong></td>
-                    <td>
-                        <select class="adm-select-ui" onchange="admUpdateDB('${order.id}', 'delivery_type', this.value)">
-                            <option value="Курьер" ${order.delivery_type === 'Курьер' ? 'selected' : ''}>🛵 Курьер</option>
-                            <option value="Такси" ${order.delivery_type === 'Такси' ? 'selected' : ''}>🚕 Такси</option>
-                            <option value="Поезд" ${order.delivery_type === 'Поезд' ? 'selected' : ''}>🚂 Поезд</option>
-                            <option value="Почта" ${order.delivery_type === 'Почта' ? 'selected' : ''}>📦 Почта</option>
+                        <select class="lrs-control" style="height:36px; font-size:12px;" onchange="lrsUpdate('${o.id}', 'delivery_type', this.value)">
+                            <option value="Курьер" ${o.delivery_type==='Курьер'?'selected':''}>🛵 Курьер</option>
+                            <option value="Такси" ${o.delivery_type==='Такси'?'selected':''}>🚕 Такси</option>
+                            <option value="Поезд" ${o.delivery_type==='Поезд'?'selected':''}>🚂 Поезд</option>
+                            <option value="Почта" ${o.delivery_type==='Почта'?'selected':''}>📦 Почта</option>
                         </select>
                     </td>
                     <td>
-                        <select class="adm-select-ui ${admGetStatusClass(order.status)}" 
-                                onchange="admUpdateDB('${order.id}', 'status', this.value, this)">
-                            <option value="Жаңа" ${order.status === 'Жаңа' ? 'selected' : ''}>⏳ Жаңа</option>
-                            <option value="Процесте" ${order.status === 'Процесте' ? 'selected' : ''}>🔄 Процесте</option>
-                            <option value="Жолда" ${order.status === 'Жолда' ? 'selected' : ''}>🚚 Жолда</option>
-                            <option value="Қабылданды" ${order.status === 'Қабылданды' ? 'selected' : ''}>✅ Жетті</option>
-                            <option value="Қайтарылды" ${order.status === 'Қайтарылды' ? 'selected' : ''}>❌ Қайтарылды</option>
+                        <select class="lrs-control st-badge ${lrsGetStClass(o.status || 'Жаңа')}" onchange="lrsUpdate('${o.id}', 'status', this.value)">
+                            <option value="Жаңа" ${o.status==='Жаңа' || !o.status ?'selected':''}>Жаңа</option>
+                            <option value="Процесте" ${o.status==='Процесте'?'selected':''}>Процесте</option>
+                            <option value="Жолда" ${o.status==='Жолда'?'selected':''}>Жолда</option>
+                            <option value="Қабылданды" ${o.status==='Қабылданды'?'selected':''}>Жетті</option>
+                            <option value="Қайтарылды" ${o.status==='Қайтарылды'?'selected':''}>Қайтарылды</option>
                         </select>
                     </td>
                     <td>
-                        ${order.receipt_url ? `<button class="adm-btn-view-receipt" onclick="admOpenModal('${order.receipt_url}')">Көру</button>` : '<span style="color:#e2e8f0">-</span>'}
+                        ${o.receipt_url ? `<button class="lrs-btn-receipt" onclick="lrsOpenModal('${o.receipt_url}')"><i class="fas fa-image"></i></button>` : '—'}
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        async function admUpdateDB(id, field, value, element) {
-            const { error } = await admSupabase.from('orders').update({ [field]: value }).eq('id', id);
-            if (!error) {
-                const idx = admOrdersData.findIndex(o => o.id == id);
-                if(idx > -1) admOrdersData[idx][field] = value;
-                
-                if (field === 'status' && element) {
-                    element.className = `adm-select-ui ${admGetStatusClass(value)}`;
-                }
-            }
+        async function lrsUpdate(id, field, val) {
+            await lrsSB.from('orders').update({ [field]: val }).eq('id', id);
+            lrsLoad();
         }
 
-        function admFilterTable() {
-            const q = document.getElementById('adm-search-input').value.toLowerCase();
-            const filtered = admOrdersData.filter(o => 
-                (o.client_name?.toLowerCase().includes(q)) || 
-                (o.client_phone?.includes(q)) ||
-                (o.address?.toLowerCase().includes(q)) ||
-                (o.product?.toLowerCase().includes(q))
-            );
-            admRenderTable(filtered);
+        function lrsGetStClass(s) {
+            if(s === 'Жаңа') return 'st-new';
+            if(s === 'Процесте') return 'st-process';
+            if(s === 'Жолда') return 'st-shipping';
+            if(s === 'Қабылданды') return 'st-done';
+            if(s === 'Қайтарылды') return 'st-return';
+            return 'st-new';
         }
 
-        function admOpenModal(url) {
-            document.getElementById('adm-receipt-img-tag').src = url;
-            document.getElementById('adm-receipt-modal').style.display = 'flex';
-        }
+        function lrsHandleTime(v) { lrsFilter(); }
+        function lrsOpenModal(url) { document.getElementById('lrs-modal-img').src = url; document.getElementById('lrs-modal').classList.add('show'); }
+        function lrsCloseModal() { document.getElementById('lrs-modal').classList.remove('show'); }
 
-        function admCloseModal() { document.getElementById('adm-receipt-modal').style.display = 'none'; }
-
-        admFetchOrders();
+        lrsLoad();
     </script>
 
 
