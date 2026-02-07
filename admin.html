@@ -351,6 +351,16 @@
         .lrs-modal-content { background: white; padding: 10px; border-radius: 20px; max-width: 450px; width: 90%; }
         .lrs-modal-content img { width: 100%; border-radius: 14px; display: block; }
 
+        .success-msg { color: green; margin-left: 10px; }
+
+        .bonus-table th, .bonus-table td {
+            border: 1px solid #e2e8f0;
+            padding: 12px 16px;
+            text-align: left;
+        }
+        .bonus-table tr:hover td { background: #f8fafc; }
+        .bonus-table th { background: #f1f5f9; }
+        .bonus-table { border-radius: 10px; overflow: hidden; margin-top: 0; }
     </style>
 </head>
 <body>
@@ -365,6 +375,7 @@
         <div class="nav-item" onclick="switchPage('ranking', this)"><i class="fas fa-trophy"></i> Рейтинг</div>
         <div class="nav-item" onclick="switchPage('clients', this)"><i class="fas fa-users"></i> Клиенттер</div>
         <div class="nav-item" onclick="switchPage('managers', this)"><i class="fas fa-user-tie"></i> Менеджерлер</div>
+        <div class="nav-item" onclick="switchPage('bonuses', this)"><i class="fas fa-percent"></i> Бонустар</div>
         <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 12px 0; padding-top: 12px;"></div>
         <div class="nav-item" data-page="settings" onclick="switchPage('settings', this)"><i class="fas fa-cog"></i> Баптау</div>
         <div class="nav-item" onclick="switchPage('help', this)"><i class="fas fa-question-circle"></i> Көмек</div>
@@ -691,6 +702,14 @@
                 <p>«Экспорт» батырмасынан ағымдағы беттің кестесін CSV форматында жүктеуге болады.</p>
             </div>
         </div>
+
+        <div id="bonusesPage" class="page">
+            <div class="header"><h1>Менеджерлердің бонустары</h1></div>
+            <div class="content-card">
+                <div class="filter-bar"><h3 style="margin:0; font-size:14px; font-weight:600;">Пайызды өзгерту</h3></div>
+                <div id="bonusesTable"></div>
+            </div>
+        </div>
     </main>
 
     <div id="imgModal" class="modal" onclick="this.style.display='none'">
@@ -778,12 +797,11 @@
         applyGlobalPeriod();
     }
     function applyGlobalPeriod() {
-        // Keep custom values in sync
         globalCustomStart = document.getElementById('globalDateStart')?.value || globalCustomStart;
         globalCustomEnd = document.getElementById('globalDateEnd')?.value || globalCustomEnd;
 
-        // Re-render all pages using new global scope
-        filterData();           // Orders table + top stats
+        // Барлық беттерді бірден жаңарту
+        filterData();
         renderSalary();
         renderAttendance();
         renderDashboard();
@@ -792,6 +810,7 @@
         renderRanking();
         renderClients();
         renderManagers();
+        loadBonusesTable();
     }
 
     async function loadData() {
@@ -1067,18 +1086,10 @@
     }
 
     function renderPayments() {
-        const data = getOrdersByGlobalPeriod();
-        const payGroups = {};
-        data.forEach(o => { const p = o.payment_type || 'Белгісіз'; if (!payGroups[p]) payGroups[p] = { count: 0, sum: 0 }; payGroups[p].count++; payGroups[p].sum += Number(o.price); });
-        const total = data.reduce((s, o) => s + Number(o.price), 0);
-        const rows = Object.entries(payGroups).map(([name, v]) => ({ name, ...v, pct: total ? (v.sum / total * 100).toFixed(1) : 0 }));
-        rows.sort((a, b) => b.sum - a.sum);
-        const tbody = document.getElementById('paymentsTableBody');
-        if (tbody) tbody.innerHTML = rows.map(r => `<tr><td>${r.name}</td><td>${r.count}</td><td>${r.sum.toLocaleString()} ₸</td><td>${r.pct}%</td></tr>`).join('');
         const ctx = document.getElementById('chartPayments');
         if (ctx && typeof Chart !== 'undefined') {
             if (chartPayments) chartPayments.destroy();
-            const colors = ['#334155', '#64748b', '#0369a1', '#059669', '#b45309'];
+
             chartPayments = new Chart(ctx.getContext('2d'), {
                 type: 'doughnut',
                 data: { labels: rows.map(r => r.name), datasets: [{ data: rows.map(r => r.sum), backgroundColor: colors }] },
@@ -1251,7 +1262,19 @@
     function showImg(url) { document.getElementById('modalImg').src = url; document.getElementById('imgModal').style.display = 'flex'; }
     function openDeleteModal(id) { deleteId = id; document.getElementById('deleteModal').style.display = 'flex'; }
     function closeDeleteModal() { document.getElementById('deleteModal').style.display = 'none'; }
-    const pageTitles = { dashboard: 'Басты панель', orders: 'Тапсырыстар', salary: 'Жалақы есебі', payments: 'Төлем түрлері', daily: 'Күнделікті есеп', ranking: 'Рейтинг', clients: 'Клиенттер', managers: 'Менеджерлер', settings: 'Баптау', help: 'Көмек' };
+    const pageTitles = { 
+    dashboard: 'Басты панель', 
+    orders: 'Тапсырыстар', 
+    salary: 'Жалақы есебі', 
+    payments: 'Төлем түрлері', 
+    daily: 'Күнделікті есеп', 
+    ranking: 'Рейтинг', 
+    clients: 'Клиенттер', 
+    managers: 'Менеджерлер', 
+    settings: 'Баптау', 
+    help: 'Көмек',
+    bonuses: 'Бонустар' // ← Қосыңыз!
+};
     function switchPage(p, el) {
         document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -1264,6 +1287,15 @@
         if (searchWrap) searchWrap.style.display = (p === 'orders') ? 'block' : 'none';
         document.getElementById('exportDropdown')?.classList.remove('open');
         document.getElementById('userMenu')?.classList.remove('open');
+
+        // Әр бетке деректерді жүктеу
+        if (p === 'orders') filterData();
+        if (p === 'payments') renderPayments();
+        if (p === 'daily') renderDaily();
+        if (p === 'ranking') renderRanking();
+        if (p === 'clients') renderClients();
+        if (p === 'managers') renderManagers();
+        if (p === 'bonuses') loadBonusesTable();
     }
     function toggleExportMenu() { document.getElementById('exportDropdown').classList.toggle('open'); }
     function toggleUserMenu() { document.getElementById('userMenu').classList.toggle('open'); }
@@ -1307,8 +1339,92 @@
         loadData(); closeDeleteModal();
     };
 
+    async function loadBonusesTable() {
+        document.getElementById('bonusesTable').innerHTML = '<div style="padding:30px; text-align:center; color:#64748b;">Жүктелуде...</div>';
+        const { data: managersList, error: err1 } = await supabaseClient.from('managers').select('id, name');
+        if (err1) {
+            document.getElementById('bonusesTable').innerHTML = 'Қате: ' + err1.message;
+            return;
+        }
+        const { data: bonuses, error: err2 } = await supabaseClient.from('manager_bonuses').select('manager_id, bonus_percent, bonus_left');
+        if (err2) {
+            document.getElementById('bonusesTable').innerHTML = 'Қате: ' + err2.message;
+            return;
+        }
+        const { data: orders } = await supabaseClient.from('orders').select('id, manager_id, price, created_at');
+        const { start, end } = getRangeForPeriod(globalPeriod);
+        const filteredOrders = orders.filter(o => {
+            const t = new Date(o.created_at);
+            if (start && t < start) return false;
+            if (end && t > end) return false;
+            return true;
+        });
+        const bonusMap = {};
+        bonuses.forEach(b => bonusMap[b.manager_id] = { percent: b.bonus_percent, left: b.bonus_left });
 
-    
+        let html = `<table class="bonus-table">
+            <tr>
+                <th>Менеджер</th>
+                <th>Бонус пайызы (%)</th>
+                <th style="background:#f0fdf4; color:#166534;">Ағымдағы бонус (₸)</th>
+                <th>Қалған бонус (₸)</th>
+                <th>Сақтау</th>
+            </tr>`;
+        managersList.forEach(m => {
+            const percent = bonusMap[m.id]?.percent ?? 9;
+            const mOrders = filteredOrders.filter(o => o.manager_id == m.id);
+            const bonusSum = mOrders.reduce((s, o) => s + (Number(o.price) * 9 / 100), 0);
+            const bonusLeft = bonusMap[m.id]?.left ?? 0;
+
+            html += `<tr>
+                <td>${m.name}</td>
+                <td>
+                    <input type="number" min="0" max="100" step="0.01" id="bonus_${m.id}" value="${percent}" style="width:60px;">
+                </td>
+                <td style="background:#f0fdf4; color:#166534; font-weight:700;">
+                    ${Math.round(bonusSum).toLocaleString()} ₸
+                </td>
+                <td>
+                    <input type="number" min="0" step="0.01" id="bonusLeft_${m.id}" value="${bonusLeft}" style="width:90px;">
+                </td>
+                <td>
+                    <button onclick="saveBonusPercent(${m.id})" id="saveBtn_${m.id}" class="btn btn-refresh" style="padding:6px 14px;">Сақтау</button>
+                    <span class="success-msg" id="msg_${m.id}"></span>
+                </td>
+            </tr>`;
+        });
+        html += `</table>
+        <div style="margin-top:10px; color:#64748b; font-size:13px;">
+            <b>Ескерту:</b> Ағымдағы бонус — таңдалған уақыт аралығындағы барлық чектерге <b>9%</b> есептеледі.<br>
+            "Қалған бонус" — админ аванс/берілген соманы қолмен өзгерте алады.
+        </div>`;
+        document.getElementById('bonusesTable').innerHTML = html;
+    }
+
+    async function saveBonusPercent(managerId) {
+        const input = document.getElementById('bonus_' + managerId);
+        const leftInput = document.getElementById('bonusLeft_' + managerId);
+        const percent = parseFloat(input.value) || 0;
+        const bonusLeft = parseFloat(leftInput.value) || 0;
+        const btn = document.getElementById('saveBtn_' + managerId);
+        btn.disabled = true;
+        // Бар ма тексеру
+        const { data: exists } = await supabaseClient.from('manager_bonuses').select('id').eq('manager_id', managerId).single();
+        let res;
+        if (exists) {
+            res = await supabaseClient.from('manager_bonuses').update({ bonus_percent: percent, bonus_left: bonusLeft, updated_at: new Date() }).eq('manager_id', managerId);
+        } else {
+            res = await supabaseClient.from('manager_bonuses').insert({ manager_id: managerId, bonus_percent: percent, bonus_left: bonusLeft });
+        }
+        if (!res.error) {
+            document.getElementById('msg_' + managerId).innerText = 'Сақталды!';
+            setTimeout(() => document.getElementById('msg_' + managerId).innerText = '', 1500);
+        } else {
+            document.getElementById('msg_' + managerId).innerText = 'Қате!';
+        }
+        btn.disabled = false;
+    }
+    window.saveBonusPercent = saveBonusPercent;
 
     loadSettings();
     loadData();
